@@ -1,7 +1,7 @@
 /* --- Contains web-crawling functions. --- */
 
 /* Parses out link to studio and initiates crawl. */
-function crawlFromStudio(string) {
+function crawlFromProject(string) {
 
   /* Variables */
   var id = 0;
@@ -22,7 +22,7 @@ function crawlFromStudio(string) {
     return;
   }
 
-  crawl (id, page);
+  collectLinks (id);
 }
 
 /* || Work In Progress || */
@@ -88,27 +88,12 @@ function transferFailed(page) {
 }
 
 /* Collects links to project pages from studio html and initiates JSON recovery. */
-function collectLinks(source)
+function collectLinks(url)
 {
   /* Constants. */
   var pre = "https://cors-anywhere.herokuapp.com/http://projects.scratch.mit.edu/internalapi/project/";
-  var post = "/get/"
+  var post = "/get/";
+  var ret_val = pre + url + post;   
+  getJSON(ret_val,analyze,[]);
 
-  /* Fetches project links and initiates JSON recovery for each. */
-  var doc = document.createElement( 'html' );
-  doc.innerHTML = source;
-  var thumb_items = doc.getElementsByClassName('project thumb item');
-  project_count += [...thumb_items].length;
-  console.log(project_count);
-  [...thumb_items].forEach(function(item){
-    var ret_val = pre + item.getAttribute('data-id') + post;
-    var name;
-    try {
-      name = item.getElementsByClassName("owner")[0].children[0].innerHTML;
-    }
-    catch(err) {
-      name = '[undefined]';
-    }
-    getJSON(ret_val,analyze,[name]);
-  });
 }

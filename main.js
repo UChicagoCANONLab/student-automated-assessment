@@ -27,7 +27,7 @@ function buttonHandler() {
   
 	
 	var requestURL = document.getElementById('inches_input').value;
-	crawlFromStudio(requestURL);
+	crawlFromProject(requestURL);
 }
 
 function dropdownHandler() {
@@ -110,7 +110,7 @@ function printReport() {
 
 /* Checks if process is done.  */
 function checkComplete() {
-  if(project_count == reports_list.length && crawl_finished) {
+  if(1 == reports_list.length) {
     console.log("Done.");
     document.getElementById('wait_time').innerHTML = 'Done.';
 

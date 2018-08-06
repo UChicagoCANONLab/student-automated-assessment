@@ -40,7 +40,7 @@ function checkScripts(sprite) {
 
 /* Top-level analysis function, checks for appropraite number of sprites
    and initializes script analysis. */
-function analyze(fileObj, user) {
+function analyze(fileObj) {
     grade_reqs.containsTwoSprites = false;
     grade_reqs.greenFlagHandled    = false;
     grade_reqs.spriteClickHandled  = false;
@@ -60,7 +60,7 @@ function analyze(fileObj, user) {
     }
 
     grade_reqs.containsTwoSprites = fileObj.info.spriteCount > 1;
-    report(user,pID);
+    report(pID);
 }
 
 
@@ -71,11 +71,11 @@ function checkbox(bool) {
 }
 
 /* Reports results. */
-function report(user,pID) {
+function report(pID) {
 
     var ret_list = [];
 
-    ret_list.push('Name: ' + user + '; Project ID: ' + pID);
+    ret_list.push('Project ID: ' + pID);
 
     ret_list.push(checkbox(grade_reqs.containsTwoSprites) + 
         ' - Project contains at least two sprites');
