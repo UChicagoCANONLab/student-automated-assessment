@@ -15,7 +15,7 @@ class GradeEvents {
     }
 
     grade(fileObj, user) {
-        initReqs();
+        this.initReqs();
 
     }
     

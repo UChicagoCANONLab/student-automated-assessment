@@ -105,16 +105,8 @@ function printReport() {
     });
     appendNewLine();
   });
-  checkComplete();
-}
-
-/* Checks if process is done.  */
-function checkComplete() {
-  if(1 == reports_list.length) {
-    console.log("Done.");
-    document.getElementById('wait_time').innerHTML = 'Done.';
-
-  }
+  console.log("Done.");
+  document.getElementById('wait_time').innerHTML = 'Done.';
 }
 
 /* Clears all project reports from the page. */
