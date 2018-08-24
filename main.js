@@ -41,7 +41,6 @@ function buttonHandler() {
 
 	var inputURL = document.getElementById('inches_input').value;
   var requestURL = getRequestURL(getID(inputURL));
-  console.log(requestURL);
   getJSON(requestURL,analyze,[]);
 }
 
@@ -160,7 +159,7 @@ function appendNewLine() {
 function printReport() {
   clearReport();
 
-  printColorKey();
+  printHeader();
 
   table = 0;
   reports_list.forEach(function(element) {
@@ -185,13 +184,16 @@ function clearReport() {
 }
 
 /* Prints color key.*/
-function printColorKey() {
+function printHeader() {
   var processObj = document.getElementById('process_status');
   processObj.style.visibility = 'visible';
   processObj.innerHTML = "My Project:";
 }
 
-
+function hideHeader() {
+  var processObj = document.getElementById('process_status');
+  processObj.style.visibility = 'hidden';
+}
 
 /* 
   ERROR REPORTS 
@@ -203,6 +205,8 @@ function linkError() {
   processObj.style.color = "red";
   processObj.innerHTML = "error: invalid link.";
   document.getElementById('wait_time').innerHTML = "";
+  document.getElementById('process_status').style.visibility = 'red';
+  hideHeader();
   IS_LOADING = false;
 }
 
