@@ -1,1 +1,1 @@
-# student-automated-assessment
+# automated-assessment

@@ -1,45 +1,106 @@
+/* MAKE SURE OBJ'S AUTO INITIALIZE AT GRADE */
+
 /* Stores the grade reports. */
 var reports_list = [];
-/* Requirements dictionary. */
-var grade_reqs = {};
-/**/
+/* Number of projects scanned so far. */
 var project_count = 0;
-/* Cross-origin request permissibility UNUSED*/
+/* Cross-origin request permissibility [UNUSED]*/
 var cross_org = true;
-
+/* Sets to true when next page returns 404. */
 var crawl_finished = false;
+/* Number of projects that meet requirements. */
+var passing_projects = 0;
+/* Number of projects that meet requirements and extensions */
+var complete_projects = 0;
+/* Grading object. */
+var gradeObj = null;
+
+var table = 0;
+
+var IS_LOADING = false;
+
+/*
+  SELECTION HTML
+*/
 
 /* Initializes html and initiates crawler. */
 function buttonHandler() {
-  if(document.getElementById('wait_time').innerHTML == "Loading...") {
+  if(IS_LOADING) {
     return;
   }
-  document.getElementById('process_button').blur();
-  clearReport();
+
+  if(!gradeObj) {
+    unitError();
+    return;
+  }
+
+  htmlInit();
+  globalInit();
+  document.getElementById('wait_time').innerHTML = "loading...";
+  IS_LOADING = true;
+
+	var inputURL = document.getElementById('inches_input').value;
+  var requestURL = getRequestURL(getID(inputURL));
+  console.log(requestURL);
+  getJSON(requestURL,analyze,[]);
+}
+
+/* Initializes global variables. */
+function globalInit() {
   reports_list = [];
   project_count = 0;
   crawl_finished = false;
   cross_org = true;
   grade_reqs = {};
+  passing_projects = 0;
+  complete_projects = 0;
+}
 
+/* Initializes HTML elements. */
+function htmlInit() {
+  document.getElementById('process_button').blur();
+  clearReport();
   noError();
-  document.getElementById('wait_time').innerHTML = "Loading...";
-  
-	
-	var requestURL = document.getElementById('inches_input').value;
-	crawlFromProject(requestURL);
 }
 
 function dropdownHandler() {
   document.getElementById("unit_dropdown").classList.toggle("show");
 }
 
+$(document).ready(function(){
+  $('.units label').click(function() {
+    $(this).addClass('selected').siblings().removeClass('selected');
+  });
+});
+
 function drop_eventHandler() {
-  document.getElementById("module_button").value = 'Events';
+  gradeObj = new GradeEvents();
+  console.log("Grading Events");
 }
 
-function drop_functionHandler() {
-  document.getElementById("module_button").value = 'Functions';
+function drop_animationHandler() {
+  gradeObj = new GradeAnimation();
+  console.log("Grading Animation");
+}
+
+function drop_condloopsHandler() {
+  gradeObj = new GradeCondLoops();
+  console.log("Grading Conditional Loops");
+}
+
+function drop_onewaysyncp1Handler() {
+   gradeObj = new GradeOneWaySyncP1();
+   console.log("Grading One Way Sync Pt. 1");
+}
+
+function drop_onewaysyncp2Handler() {
+   gradeObj = new GradeOneWaySyncP2();
+   console.log("Grading One Way Sync Pt. 2");
+}
+
+function drop_decompbyseqHandler() {
+   gradeObj = new GradeDecompBySeq();
+   console.log("Grading Decomposition By Sequence");
 }
 
 window.onclick = function(event) {
@@ -55,58 +116,60 @@ window.onclick = function(event) {
   });
 }
 
-/* Request project jsons and initiate analysis. */
-function getJSON(requestURL,process_function, args){
-	var request = new XMLHttpRequest();
-	request.open('GET', requestURL);
-	request.responseType = 'json';
-	request.send();
-	request.onload = function() {
-		var project = request.response;
-    args.unshift(project)
-		process_function.apply(null,args);
-	}
-}
+/*
+  DISPLAY RESULTS
+*/
 
 /* Prints a line of grading text. */
-function appendText(string) {
+function appendText(string_list) {
   var tbi = document.createElement("div");
   tbi.className = "dynamic";
 
-  var newContent = document.createTextNode(string);
+  string_list.forEach(function(sub_element) {
+    var newContent = document.createTextNode(sub_element);
+    tbi.appendChild(newContent);
+    var br = document.createElement("br");
+    tbi.appendChild(br);
+  });
 
-  tbi.appendChild(newContent);
-  tbi.style.paddingLeft = "" + (window.innerWidth/2 - 190) + "px";
-  tbi.style.font = "1rem 'Verdana', sans-serif";
-  tbi.style.fontSize = "14px";
+  tbi.style.width = 33 + "%";
+  tbi.style.fontSize = "15px";
+  tbi.style.display= 'inline-block';
+
+  var ai = document.getElementById("report");
+  document.body.insertBefore(tbi, ai);
+
+  table++;
+  if (table > 2) {
+    table = 0;
+  }
+}
+
+/* Prints a blank line. */
+function appendNewLine() {
+  var tbi = document.createElement("div");
+  tbi.className = "lines";
+  tbi.style.padding = "15px";
 
   var ai = document.getElementById("report");
   document.body.insertBefore(tbi, ai);
 }
 
-/* Prints a blank line. */
-function appendNewLine() {
-  var tbi = document.createElement("div"); 
-  tbi.className = "dynamic";
-  tbi.style.padding = "15px";
-
-  var ai = document.getElementById("report"); 
-  document.body.insertBefore(tbi, ai); 
-}
-
-/* Prints out the contents of report_list as a 
+/* Prints out the contents of report_list as a
    series of consecutive project reports. */
 function printReport() {
   clearReport();
-  sortReport();
+
+  printColorKey();
+
+  table = 0;
   reports_list.forEach(function(element) {
-    element.forEach(function(sub_element) {
-      appendText(sub_element);
-    });
-    appendNewLine();
+    appendText(element);
+    if (table == 0){
+      appendNewLine();
+    }
   });
-  console.log("Done.");
-  document.getElementById('wait_time').innerHTML = 'Done.';
+  processComplete();
 }
 
 /* Clears all project reports from the page. */
@@ -115,25 +178,43 @@ function clearReport() {
   while(removeables[0]) {
     removeables[0].remove();
   }
+  var removeables = document.getElementsByClassName('lines');
+  while(removeables[0]) {
+    removeables[0].remove();
+  }
 }
 
-/* Sorts the reports in reports_list alphabetically 
-   username. */
-function sortReport() {
-  reports_list.sort(function(a,b) {
-    return a[0].localeCompare(b[0]);
-  })
+/* Prints color key.*/
+function printColorKey() {
+  var processObj = document.getElementById('process_status');
+  processObj.style.visibility = 'visible';
+  processObj.innerHTML = "My Project:";
 }
 
-/* ERROR REPORTS */
+
+
+/* 
+  ERROR REPORTS 
+*/
+
 function linkError() {
-  document.getElementById("process_status").style.color = "red";
-  document.getElementById('process_status').innerHTML = "Error: invalid link.";
-  document.getElementById('wait_time').innerHTML = "Studio links are generally\
-  of the form: <br /> <span class = 'link'> https://scratch.mit.edu/studios/\
-  [id number]/</span>";
+  var processObj = document.getElementById('process_error');
+  processObj.style.visibility = 'visible';
+  processObj.style.color = "red";
+  processObj.innerHTML = "error: invalid link.";
+  document.getElementById('wait_time').innerHTML = "";
+  IS_LOADING = false;
+}
+
+function unitError() {
+  var processObj = document.getElementById('process_error');
+  processObj.style.visibility = 'visible';
+  processObj.style.color = "red";
+  processObj.innerHTML = "error: no unit selected.";
+  IS_LOADING = false;
 }
 
 function noError() {
-  document.getElementById('process_status').innerHTML = "";
+  document.getElementById('process_error').innerHTML = "";
+  document.getElementById('process_error').style.visibility = 'hidden';
 }
