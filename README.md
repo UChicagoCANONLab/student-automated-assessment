@@ -18,7 +18,7 @@ Grades a single of Scratch project by Scratch Encore module standards.
 * Functions for grading modules
 * Functions for printing grade summaries.
 
-### crawler.css
+### crawler.js
 
 * Functions for retrieving JSONs.
 
